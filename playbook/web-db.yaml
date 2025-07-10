@@ -1,0 +1,31 @@
+---
+- name: Web server setup
+  hosts: webservers
+  become: yes
+  tasks:
+    - name: Install HTTPD
+      yum:
+        name: httpd
+        state: present
+    - name: Start HTTPD service
+      service:
+        name: httpd
+        state: started
+        enabled: yes   
+    - name: Copying index.html
+      copy:
+        src: index.html
+        dest: /var/www/html/index.html
+- name: Database server setup
+  hosts: dbservers
+  become: yes
+  tasks:
+    - name : Install mariadb-server
+      yum:
+        name: mariadb-server
+        state: present
+    - name: Start MariaDB service
+      service:
+        name: mariadb
+        state: started
+        enabled: yes

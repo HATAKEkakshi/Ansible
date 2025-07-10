@@ -1,0 +1,18 @@
+---
+- name: Web server setup
+  hosts: webservers
+  become: yes
+  tasks:
+    - name: Install HTTPD
+      yum:
+        name: httpd
+        state: present
+    - name: Start HTTPD service
+      service:
+        name: httpd
+        state: started
+        enabled: yes   
+    - name: Copying index.html
+      copy:
+        src: index.html
+        dest: /var/www/html/index.html
