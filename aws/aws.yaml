@@ -1,0 +1,34 @@
+- hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Create a new key pair
+      ec2_key:
+        name: my_keypair
+        region: us-east-1
+      register: keyout
+
+    - name: Display the output of the key pair creation
+      debug:
+        var: keyout
+
+    - name: Save the private key to a file
+      copy:
+        content: "{{ keyout.key.private_key }}"
+        dest: /my_keypair.pem
+        mode: '0600'
+      when: keyout.changed
+
+    - name: Start an EC2 instance with a public IP address
+      amazon.aws.ec2_instance:
+        name: "public-compute-instance"
+        key_name: "my_keypair"
+        region: us-east-1
+        #vpc_subnet_id: subnet-5ca1ab1e
+        instance_type: t2.micro
+        security_group: default
+        #network:
+          #assign_public_ip: true
+        image_id: ami-020cba7c55df1f615
+        exact_count: 1
+        tags:
+          Environment: Testing
