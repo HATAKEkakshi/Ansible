@@ -2,6 +2,8 @@
 - name: Provisioning Servers
   hosts: all
   become: yes
+  vars:
+    mydir: /opt/dir22
   tasks:
     - name: Install ntp agent on CentOS
       yum:
@@ -38,4 +40,43 @@
         name: chrony
         state: started
         enabled: yes
+      when: ansible_distribution == "Ubuntu"
+    - name: Copy using inline content
+      copy:
+        content: '# This server is managed by Ansible. No manual changes please.'
+        dest: /etc/motd
+    - name: Create a folder
+      file:
+        path: "{{mydir}}"
+        state: directory
+    - name: Deploy ntp agent conf on CentOS
+      template:
+        src: templates/ntpconf_centos
+        dest: /etc/chrony.conf
+        backup: yes
+      when: ansible_distribution == "CentOS"
+      notify:
+        - Restart chronyd service on CentOS
+    - name: Deploy ntp agent conf on Ubuntu
+      template:
+        src: templates/ntpconf_ubuntu
+        dest: /etc/chrony/chrony.conf
+        backup: yes
+      when: ansible_distribution == "Ubuntu"
+      notify:
+        - Restart chrony service on Ubuntu
+    - name: Dump file
+      copy:
+        src: files/myfile.txt
+        dest: /tmp/myfile.txt
+  handlers:
+    - name: Restart chronyd service on CentOS
+      service:
+        name: chronyd
+        state: restarted
+      when: ansible_distribution == "CentOS"
+    - name: Restart chrony service on Ubuntu
+      service:
+        name: chrony
+        state: restarted
       when: ansible_distribution == "Ubuntu"
