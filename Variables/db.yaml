@@ -1,0 +1,45 @@
+---
+- name: Database server setup
+  hosts: dbservers
+  become: yes
+  vars:
+    dbname: electric
+    dbuser: current
+    dbpass: tesla
+  tasks:
+    - debug: 
+        msg: "The dbname is {{ dbname }}, dbuser is {{ dbuser }}, and dbpass is {{ dbpass }}"
+    - debug:
+        var: dbuser
+    - name: Install mariadb-server
+      yum:
+        name: mariadb-server
+        state: present
+
+    - name : Install python3-mysql
+      yum:
+        name: python3-PyMySQL
+        state: present
+    - name: Start MariaDB service
+      service:
+        name: mariadb
+        state: started
+        enabled: yes
+
+    - name: Create a new database with name 'electric'
+      community.mysql.mysql_db:
+        name: "{{ dbname }}"
+        state: present
+        login_unix_socket: /var/lib/mysql/mysql.sock
+    - name: Create database user with name 'current' and password 'tesla' with all database privileges
+      community.mysql.mysql_user:
+        name: "{{ dbuser }}"
+        password: "{{ dbpass }}"
+        priv: '*.*:ALL'
+        state: present
+        login_unix_socket: /var/lib/mysql/mysql.sock
+      register: dbout
+
+    - name: Display the output of the database user creation
+      debug:
+        var: dbout

@@ -1,11 +1,13 @@
 all:
   hosts:
     web01:
-      ansible_host: 172.31.0.75
+      ansible_host: "{{ web01_ip }}"
     web02:
-      ansible_host: 172.31.9.195
+      ansible_host: "{{ web02_ip }}"
+    web03:
+      ansible_host: "{{ web03_ip }}"
     db01:
-      ansible_host: 172.31.3.145
+      ansible_host: "{{ db01_ip }}"
   children:
     webservers:
       hosts:

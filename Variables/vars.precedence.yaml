@@ -1,0 +1,17 @@
+---
+- name: Understanding variable
+  hosts: all
+  become: yes
+  vars:
+    USRNM: "bob"
+    COMM: "Bob User"
+  tasks:
+    - name: Create new user
+      user:
+        name: "{{ USRNM }}"
+        comment: "{{ COMM }}"
+      register: user_creation
+    - debug:
+        var: user_creation.name
+    - debug:
+        var: user_creation.comment
